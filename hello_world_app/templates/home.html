@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>To-Do List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: gray;
+        }
+        .task-actions {
+            display: inline-block;
+            margin-left: 10px;
+        }
+        button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <h1>My To-Do List</h1>
+
+    <!-- Search Form -->
+    <form method="GET">
+        <input type="text" name="q" placeholder="Search tasks..." value="{{ query|default:'' }}">
+        <button type="submit">Search</button>
+    </form>
+
+    <hr>
+
+    <!-- Add Task Form -->
+    <form method="POST">
+        {% csrf_token %}
+        <input type="text" name="title" placeholder="Task title" required>
+        <input type="text" name="description" placeholder="Description">
+        <input type="date" name="due_date">
+        <button type="submit" name="add_task">Add Task</button>
+    </form>
+
+    <h2>Tasks</h2>
+    <ul>
+        {% for task in tasks %}
+        <li>
+            <!-- Toggle completion -->
+            <form method="POST" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="task_id" value="{{ task.id }}">
+                <button type="submit" name="toggle_task">
+                    {% if task.completed %}✅{% else %}⬜{% endif %}
+                </button>
+            </form>
+
+            <!-- Task text -->
+            <span class="{% if task.completed %}completed{% endif %}">
+                {{ task.title }} — {{ task.description }}
+                {% if task.due_date %}(Due: {{ task.due_date }}){% endif %}
+            </span>
+
+            <!-- Delete button -->
+            <form method="POST" style="display:inline;" class="task-actions">
+                {% csrf_token %}
+                <input type="hidden" name="task_id" value="{{ task.id }}">
+                <button type="submit" name="delete_task" title="Delete">🗑️</button>
+            </form>
+        </li>
+        {% empty %}
+        <li>No tasks found.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
+
